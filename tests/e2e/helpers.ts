@@ -25,6 +25,7 @@ interface DebugApi {
   warpToBoss(): Promise<void>;
   smashBoss(): Promise<boolean>;
   forceGameOver(): Promise<void>;
+  completeStageNow(): Promise<void>;
   setDrag(id: number, x: number, y: number): Promise<void>;
   clearDrag(): Promise<void>;
   getTouchUi(): Promise<boolean>;
@@ -144,6 +145,8 @@ export async function apiOf(page: Page): Promise<DebugApi> {
       return false;
     },
     forceGameOver: () => page.evaluate(() => (window as unknown as PD).__PD_API__?.forceGameOver()),
+    completeStageNow: () =>
+      page.evaluate(() => (window as unknown as PD).__PD_API__?.completeStageNow()),
   };
 }
 
@@ -166,6 +169,21 @@ export async function waitBossReady(page: Page, timeout = 45_000): Promise<void>
   );
 }
 
+export async function dumpGameState(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const api = (
+      window as unknown as {
+        __PD_API__?: {
+          getStats(): Record<string, unknown>;
+          enemyInfo(): Array<{ id: string; x: number; y: number; moveT: number }>;
+        };
+      }
+    ).__PD_API__;
+    if (!api) return 'no api';
+    return JSON.stringify({ stats: api.getStats(), enemies: api.enemyInfo() });
+  });
+}
+
 export async function expectScene(page: Page, name: string, timeout = 15_000): Promise<void> {
   await page.waitForFunction(
     (expected) => String((window as unknown as PD).__PD_SAVE__?.sceneKey()) === expected,
@@ -182,4 +200,20 @@ export function canvasPoint(
   const scaleX = box.width / GAME_WIDTH;
   const scaleY = box.height / GAME_HEIGHT;
   return { x: box.x + gameX * scaleX, y: box.y + gameY * scaleY };
+}
+
+export async function expectSceneOrForce(
+  page: Page,
+  name: string,
+  timeout: number,
+  force: () => Promise<void>,
+): Promise<void> {
+  try {
+    await expectScene(page, name, timeout);
+  } catch {
+    const state = await dumpGameState(page);
+    await force();
+    await expectScene(page, name, 60_000);
+    throw new Error(`scene '${name}' required force-progress. state at timeout: ${state}`);
+  }
 }

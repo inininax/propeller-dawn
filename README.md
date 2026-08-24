@@ -17,10 +17,11 @@ An original browser-based vertical shoot 'em up featuring piston-powered fighter
 - **Power-ups & bombs** — 3 power levels per ship; bombs clear bullets and convert them to score.
 - **3 difficulties** — Cadet / Ace / Veteran change bullet speed, fire rate, boss HP, lives and score multiplier — not just counts.
 - **Readable bullet patterns** — four distinct bullet shapes (color-blind friendly), every heavy attack telegraphed by flash/siren/warning line; no unavoidable patterns.
-- **Keyboard + touch** — Arrows/WASD, Space fire, X bomb, Z focus, Esc pause. On touch: relative drag movement, auto-fire, on-screen bomb & focus buttons, `pointercancel` safe.
+- **Keyboard + touch + gamepad** — Arrows/WASD, Space fire, X bomb, Z focus, Esc pause. On touch: relative drag movement, auto-fire, on-screen bomb & focus buttons, `pointercancel` safe. Gamepad: stick/D-pad, A/R1 fire, B/L1 bomb, X/L2 focus, Start pause.
 - **KO/EN UI** switchable instantly in Settings; system language auto-detected.
 - **Accessibility options** — reduce screen shake, reduce flashing, keyboard-navigable menus with visible focus.
 - **Procedural everything** — all graphics are drawn at runtime to canvas; all SFX/music are synthesized live via Web Audio. Zero binary assets, zero third-party assets, no trackers, no accounts (progress stays in your browser's localStorage).
+- **Installable & offline-friendly** — web app manifest plus a service worker in production builds caches the app shell and hashed assets after first visit.
 
 ## Run it locally
 

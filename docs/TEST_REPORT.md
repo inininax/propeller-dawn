@@ -1,6 +1,6 @@
 # Propeller Dawn — Test Report
 
-Date: 2026-08-23 · Build: 1.0.0 (session 1)
+Date: 2026-08-25 · Build: 1.1.0
 
 ## Automated quality gates
 
@@ -54,6 +54,12 @@ Asset budget: total `dist/` is 1.3 MB uncompressed — far below the 15 MB budge
 
 Lighthouse/Core Web Vitals on the deployed URL: **not yet recorded** (requires deployment; scheduled first thing after Pages goes live — tracked in WORKLOG).
 
+## v1.1.0 additions (2026-08-25)
+
+- **Gamepad**: pure mapper (`mapPad`) unit-tested (6 asserts incl. deadzone, d-pad priority over stick, diagonal normalization, defensive empty-axes snapshot). Scene wiring is edge-triggered for bomb/pause; headless CI runs pad-less by design.
+- **Offline service worker**: registered only when `import.meta.env.PROD && !__PD_DEBUG_HOOKS__` — dev server and the e2e build never register it, so automated flows are unaffected. Cache strategy: network-first navigations with cached `index.html` fallback; cache-first for hashed `/assets/`.
+- **Continue penalty**: pure functions (`applyContinuePenalty`, `continuePenaltyFactor`) unit-tested (×0.9 compounding); applied to the displayed final score, hi-score submission and record comparison. Removes the previously documented score-farming limitation.
+
 ## Independent review pass (2026-08-24)
 
 A separate reviewer agent audited production-leak safety, lifecycle leaks, UI wiring, originality, doc accuracy and i18n completeness before release. Findings (1 blocker, 4 major/minor, 2 nits) were **all fixed and re-verified** against every gate in the table above; notable ones:
@@ -85,5 +91,5 @@ Remaining manual matrix (next session, per spec):
 
 1. Online leaderboard interface is P1 (save layer already isolates score submission behind `SaveService.submitScore`).
 2. PWA offline (service worker) not installed; manifest present for installability groundwork.
-3. Continue keeps accumulated score by design (documented arcade-rule deviation); hi-score farming via continues is possible until the planned penalty multiplier lands.
+3. ~~Continue keeps accumulated score~~ — resolved in v1.1.0: final score applies a compounding ×0.9 penalty per continue before display and hi-score submission.
 4. Ember Crown laser column damage uses the player hitbox point vs. rect test — grazing the visual edge is slightly more forgiving than it looks (tuned conservatively).

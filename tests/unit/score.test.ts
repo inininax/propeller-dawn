@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  applyContinuePenalty,
+  continuePenaltyFactor,
   createScoreState,
   registerGraze,
   registerItemPickup,
@@ -97,5 +99,18 @@ describe('stage clear bonus', () => {
     });
     expect(bonus).toBe(40000);
     expect(stageClearBonus({ livesLeft: 2, bombsLeft: 1, difficultyMult: 1.5 })).toBe(37500);
+  });
+});
+
+describe('continue penalty', () => {
+  it('keeps score intact without continues', () => {
+    expect(applyContinuePenalty(123456, 0)).toBe(123456);
+    expect(continuePenaltyFactor(0)).toBe(1);
+  });
+
+  it('applies compounding ×0.9 per continue', () => {
+    expect(applyContinuePenalty(100000, 1)).toBe(90000);
+    expect(applyContinuePenalty(100000, 2)).toBe(81000);
+    expect(continuePenaltyFactor(3)).toBeCloseTo(0.729, 6);
   });
 });

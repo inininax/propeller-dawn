@@ -6,7 +6,7 @@ import { randomSeed } from '../core/rng';
 import { addBackdrop, getServices, makeBodyText, makeTitleText, tr } from './helpers';
 import { GameButton, FONT_STACK } from '../ui/widgets';
 import { MenuList } from '../ui/hud';
-import { formatScore } from '../systems/score';
+import { applyContinuePenalty, continuePenaltyFactor, formatScore } from '../systems/score';
 import type { LocaleKey } from '../systems/locale/en';
 import type { BriefingData, ResultData, RunState } from './types';
 
@@ -37,9 +37,10 @@ export class ResultScene extends Phaser.Scene {
     this.buttons = [];
 
     const diff = DIFFICULTIES[data.run.difficulty];
+    const finalScore = applyContinuePenalty(data.run.score, data.run.continuesUsed);
     const previousHi = save.data.hiscores[data.run.difficulty];
-    const newRecord = data.run.score > previousHi;
-    save.submitScore(data.run.difficulty, data.run.score);
+    const newRecord = finalScore > previousHi;
+    save.submitScore(data.run.difficulty, finalScore);
 
     audio.stopMusic();
     audio.startMusic('result');
@@ -69,12 +70,26 @@ export class ResultScene extends Phaser.Scene {
     }
 
     this.add
-      .text(GAME_WIDTH / 2, 290, formatScore(data.run.score), {
+      .text(GAME_WIDTH / 2, 290, formatScore(finalScore), {
         fontFamily: FONT_STACK,
         fontSize: '52px',
         color: '#ffffff',
       })
       .setOrigin(0.5);
+
+    if (data.run.continuesUsed > 0) {
+      makeBodyText(
+        this,
+        GAME_WIDTH / 2,
+        336,
+        tr(this, 'result.penaltyNote', {
+          n: data.run.continuesUsed,
+          m: continuePenaltyFactor(data.run.continuesUsed).toFixed(2),
+        }),
+        13,
+        '#e8734a',
+      );
+    }
 
     const stats = [
       `${tr(this, 'result.best')} (${tr(this, diff.nameKey as LocaleKey)}): ${formatScore(

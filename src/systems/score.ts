@@ -135,3 +135,13 @@ export function stageClearBonus(input: StageBonusInput): number {
 export function formatScore(score: number): string {
   return score.toLocaleString('en-US');
 }
+
+export function applyContinuePenalty(score: number, continuesUsed: number): number {
+  if (continuesUsed <= 0) return score;
+  const factor = Math.pow(0.9, continuesUsed);
+  return Math.round(score * factor);
+}
+
+export function continuePenaltyFactor(continuesUsed: number): number {
+  return continuesUsed <= 0 ? 1 : Math.pow(0.9, continuesUsed);
+}

@@ -95,6 +95,7 @@ export const KO: Record<LocaleKey, string> = {
   'result.continueOffer': '이어하시겠습니까?',
   'result.continueLeft': '{n}회 남음',
   'result.useContinue': '이어하기 ({n})',
+  'result.penaltyNote': '이어하기 {n}회 사용 · 점수 ×{m}',
   'result.giveUp': '비행 종료',
   'result.returnTitle': '타이틀 화면',
 

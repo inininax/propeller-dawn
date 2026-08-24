@@ -3,6 +3,23 @@
 All notable changes to Propeller Dawn are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/) · [SemVer](https://semver.org/).
 
+## [1.1.0] — 2026-08-25
+
+### Added
+
+- **Gamepad support** — left stick/D-pad move, A/R1 fire, B/L1 bomb, X/L2 focus, Start pause (edge-triggered), hot-plug safe.
+- **Offline support** — production builds register a service worker (app-shell + hashed-asset caching); the game now runs after first load without a network connection.
+- **Continue score penalty** — each continue applies ×0.9 (compounding) to the final submitted score; results screen shows the multiplier and hi-scores use the adjusted value, closing the documented score-farming loophole.
+- ShipSelect now shows the selected difficulty description; Settings gained a touch-accessible Back button.
+
+### Fixed
+
+- Settings-from-pause return path could strand a paused overlay over later screens (independent review finding).
+- Continue-offer expiry state no longer persists across result-screen restarts.
+- Continue countdown timer resets between offers.
+- Tutorial completion now honors its original navigation target.
+- Canvas `pointercancel` listener released on scene cleanup; `?seed=` URL param compiled out of production.
+
 ## [1.0.0] — 2026-08-23
 
 ### Added

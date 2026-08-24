@@ -94,6 +94,7 @@ export const EN = {
   'result.continueOffer': 'Continue?',
   'result.continueLeft': '{n} left',
   'result.useContinue': 'Continue ({n})',
+  'result.penaltyNote': 'Continues used: {n} · score ×{m}',
   'result.giveUp': 'End Flight',
   'result.returnTitle': 'Title Screen',
 

@@ -23,6 +23,12 @@ import { PlayerShip } from '../entities/player';
 import { ParallaxBackground } from '../art/backgrounds';
 import { keyToGameCommand, keyToPause, relativeDragToVector } from '../systems/input/commands';
 import {
+  mapPad,
+  snapshotPad,
+  type PadInputState,
+  type PhaserLikePad,
+} from '../systems/input/gamepad';
+import {
   createScoreState,
   registerGraze,
   registerItemPickup,
@@ -106,6 +112,12 @@ export class GameScene extends Phaser.Scene {
   private focused = false;
 
   private pressedCommands = new Set<string>();
+
+  private padState: PadInputState | null = null;
+
+  private padBombPrev = false;
+
+  private padPausePrev = false;
 
   private bombCooldownMs = 0;
 
@@ -308,6 +320,7 @@ export class GameScene extends Phaser.Scene {
     if (this.stageCompleted || this.gameOverStarted) return;
     this.stageElapsedMs += dtMs;
     this.bombCooldownMs = Math.max(0, this.bombCooldownMs - dtMs);
+    this.pollGamepad();
 
     tickScore(this.scoreState, this.stageElapsedMs, SCORE_CONFIG);
     this.updatePlayer(dtMs);
@@ -336,6 +349,26 @@ export class GameScene extends Phaser.Scene {
     this.refreshHud();
   }
 
+  private pollGamepad(): void {
+    const gp = this.input.gamepad;
+    const pad = gp?.getPad(0);
+    if (!pad) {
+      this.padState = null;
+      return;
+    }
+    const snap = snapshotPad(pad as unknown as PhaserLikePad);
+    const state = mapPad(snap.axes, snap.btn);
+    if (state.bomb && !this.padBombPrev) {
+      this.tryBomb();
+    }
+    if (state.pause && !this.padPausePrev) {
+      this.togglePause();
+    }
+    this.padBombPrev = state.bomb;
+    this.padPausePrev = state.pause;
+    this.padState = state;
+  }
+
   private updatePlayer(dtMs: number): void {
     if (!this.player.isAlive) {
       if (this.respawnCountdownMs > 0) {
@@ -349,17 +382,30 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     const vec = this.currentMoveVector();
-    const firing = this.touchMode ? true : this.pressedCommands.has('fire');
+    const padFiring = this.padState?.fire ?? false;
+    const firing = this.touchMode || padFiring ? true : this.pressedCommands.has('fire');
+    const focusedNow = this.focused || (this.padState?.focus ?? false);
     this.player.update(
       dtMs,
-      { vx: vec.x, vy: vec.y, focused: this.focused, firing },
+      { vx: vec.x, vy: vec.y, focused: focusedNow, firing },
       (levelIdx) => this.firePlayer(levelIdx),
       this.run.power,
     );
   }
 
   private currentMoveVector(): { x: number; y: number } {
-    if (this.touchMode) return this.dragVector;
+    if (this.touchMode) {
+      if (this.padState && (this.padState.mx !== 0 || this.padState.my !== 0)) {
+        return { x: this.padState.mx, y: this.padState.my };
+      }
+      return this.dragVector;
+    }
+    const pad = this.padState;
+    const px = pad?.mx ?? 0;
+    const py = pad?.my ?? 0;
+    if (px !== 0 || py !== 0) {
+      return { x: px, y: py };
+    }
     let x = 0;
     let y = 0;
     if (this.pressedCommands.has('left')) x -= 1;

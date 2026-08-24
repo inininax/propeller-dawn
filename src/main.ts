@@ -36,6 +36,7 @@ try {
     disableContextMenu: true,
     banner: false,
     fps: { target: 60, min: 30 },
+    input: { gamepad: true },
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -65,6 +66,13 @@ try {
   });
 } catch (err) {
   reportBootError(err);
+}
+
+if (import.meta.env.PROD && !__PD_DEBUG_HOOKS__ && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    const swUrl = `${import.meta.env.BASE_URL}sw.js`;
+    navigator.serviceWorker.register(swUrl).catch(() => undefined);
+  });
 }
 
 declare global {

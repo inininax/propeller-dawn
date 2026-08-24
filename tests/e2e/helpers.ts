@@ -18,6 +18,7 @@ interface DebugApi {
     playerX: number;
     playerY: number;
     playerAlive: boolean;
+    bossEntered: boolean;
   }>;
   toggleGod(): Promise<boolean>;
   grantResources(): Promise<void>;
@@ -125,6 +126,7 @@ export async function apiOf(page: Page): Promise<DebugApi> {
             playerX: -1,
             playerY: -1,
             playerAlive: false,
+            bossEntered: false,
           },
       ),
     toggleGod: () =>
@@ -147,6 +149,21 @@ export async function apiOf(page: Page): Promise<DebugApi> {
 
 export async function sceneKey(page: Page): Promise<string> {
   return page.evaluate(() => (window as unknown as PD).__PD_SAVE__?.sceneKey() ?? 'unknown');
+}
+
+export async function waitBossReady(page: Page, timeout = 45_000): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const st = (
+        window as unknown as {
+          __PD_API__?: { getStats(): { bossActive: boolean; bossEntered: boolean } };
+        }
+      ).__PD_API__?.getStats();
+      return st !== undefined && st.bossActive === true && st.bossEntered === true;
+    },
+    undefined,
+    { timeout },
+  );
 }
 
 export async function expectScene(page: Page, name: string, timeout = 15_000): Promise<void> {

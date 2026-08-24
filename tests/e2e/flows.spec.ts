@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { gotoFresh, apiOf, saveOf, sceneKey, expectScene } from './helpers';
+import { gotoFresh, apiOf, saveOf, sceneKey, expectScene, waitBossReady } from './helpers';
 
 test.describe('desktop core flows', () => {
   let page: Page;
@@ -108,8 +108,7 @@ test.describe('desktop core flows', () => {
     await api.toggleGod();
     await api.grantResources();
     await api.warpToBoss();
-    await page.waitForTimeout(5400);
-    expect((await api.getStats()).bossActive).toBe(true);
+    await waitBossReady(page);
     expect(await api.smashBoss()).toBe(true);
     await expectScene(page, 'StageClearOverlay', 35_000);
     await page.waitForTimeout(2400);
@@ -123,7 +122,7 @@ test.describe('desktop core flows', () => {
     await api.toggleGod();
     await api.grantResources();
     await api.warpToBoss();
-    await page.waitForTimeout(6200);
+    await waitBossReady(page, 60_000);
     expect(await api.smashBoss()).toBe(true);
     await expectScene(page, 'Result', 25_000);
   });

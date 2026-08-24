@@ -952,6 +952,7 @@ interface DebugStats {
   waveFinished: boolean;
   bossWaveSeen: boolean;
   finalBossSpawned: boolean;
+  bossEntered: boolean;
 }
 
 function installDebugHooks(scene: GameScene): void {
@@ -971,6 +972,7 @@ function installDebugHooks(scene: GameScene): void {
     dragVector: { x: number; y: number };
     bossWaveSeen: boolean;
     finalBossSpawned: boolean;
+    bossEntered: boolean;
     beginGameOver(): void;
     completeStage(): void;
   };
@@ -1007,6 +1009,7 @@ function installDebugHooks(scene: GameScene): void {
         waveFinished: g.waveRunner.finished,
         bossWaveSeen: g.bossWaveSeen,
         finalBossSpawned: g.finalBossSpawned,
+        bossEntered: g.boss?.isEntered ?? false,
       };
     },
     toggleGod(): boolean {

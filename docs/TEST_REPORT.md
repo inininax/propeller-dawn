@@ -1,6 +1,6 @@
 # Propeller Dawn — Test Report
 
-Date: 2026-08-25 · Build: 1.1.0
+Date: 2026-08-25 · Build: 1.1.0 (CI run #3)
 
 ## Automated quality gates
 
@@ -59,6 +59,10 @@ Lighthouse/Core Web Vitals on the deployed URL: **not yet recorded** (requires d
 - **Gamepad**: pure mapper (`mapPad`) unit-tested (6 asserts incl. deadzone, d-pad priority over stick, diagonal normalization, defensive empty-axes snapshot). Scene wiring is edge-triggered for bomb/pause; headless CI runs pad-less by design.
 - **Offline service worker**: registered only when `import.meta.env.PROD && !__PD_DEBUG_HOOKS__` — dev server and the e2e build never register it, so automated flows are unaffected. Cache strategy: network-first navigations with cached `index.html` fallback; cache-first for hashed `/assets/`.
 - **Continue penalty**: pure functions (`applyContinuePenalty`, `continuePenaltyFactor`) unit-tested (×0.9 compounding); applied to the displayed final score, hi-score submission and record comparison. Removes the previously documented score-farming limitation.
+
+## CI robustness fix (2026-08-25, run #2)
+
+Campaign E2E failed on CI run #2: fixed wall-clock waits assumed simulation kept pace with real time, but on slower headless runners the fixed-step cap lets sim time lag, so the debug kill fired before the boss finished its entry animation. Replaced with a condition poll `waitBossReady` (`bossActive && bossEntered`, new debug stat, 45–60 s budget) for both stages; CI `.node-version` bumped 20→22 to clear actions' deprecation warnings. Local re-verification: E2E 16/16 (2 skipped), unit 62/62.
 
 ## Independent review pass (2026-08-24)
 

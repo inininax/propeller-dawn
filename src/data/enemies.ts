@@ -37,7 +37,8 @@ function hoverTop(t: number, sx: number, sy: number) {
   }
   if (t > 9) {
     const u = t - 9;
-    return { x: sx, y: sy + 208 + 60 * u, angleRad: DOWN, done: sy + 208 + 60 * u > 1100 };
+    const y = sy + 208 + 60 * u;
+    return { x: sx, y, angleRad: DOWN, done: y > 1100 };
   }
   return {
     x: sx + Math.sin((t - 1.6) * 1.1) * 70,

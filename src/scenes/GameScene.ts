@@ -48,7 +48,7 @@ import type { RunState } from './types';
 declare const __PD_DEBUG_HOOKS__: boolean;
 
 const FIXED_STEP_MS = 1000 / 60;
-const MAX_STEPS_PER_FRAME = 5;
+const MAX_STEPS_PER_FRAME = __PD_DEBUG_HOOKS__ ? 240 : 5;
 const SCORE_CONFIG = {
   comboWindowMs: COMBO_WINDOW_MS,
   multStepCombo: 10,

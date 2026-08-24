@@ -64,6 +64,14 @@ Lighthouse/Core Web Vitals on the deployed URL: **not yet recorded** (requires d
 
 Campaign E2E failed on CI run #2: fixed wall-clock waits assumed simulation kept pace with real time, but on slower headless runners the fixed-step cap lets sim time lag, so the debug kill fired before the boss finished its entry animation. Replaced with a condition poll `waitBossReady` (`bossActive && bossEntered`, new debug stat, 45–60 s budget) for both stages; CI `.node-version` bumped 20→22 to clear actions' deprecation warnings. Local re-verification: E2E 16/16 (2 skipped), unit 62/62.
 
+## CI stability iterations (2026-08-25, runs #3–#5)
+
+Root-caused via in-failure state dumps (scene key, stats, live enemy list):
+
+1. Run #3/#4: hidden auto-pause froze the Game scene on headless runners → e2e builds no longer register it.
+2. Run #5: simulation crawled at a few % of wall speed (RAF ~2–5 fps × 5-step cap) → e2e builds raise the per-frame step cap to 240 (production unchanged); `hoverTop` path now terminates immediately once off-screen instead of tens of seconds later.
+   Force-progress fallback with full state dump remains as a safety net; any forced transition is reported loudly in the failure message.
+
 ## Independent review pass (2026-08-24)
 
 A separate reviewer agent audited production-leak safety, lifecycle leaks, UI wiring, originality, doc accuracy and i18n completeness before release. Findings (1 blocker, 4 major/minor, 2 nits) were **all fixed and re-verified** against every gate in the table above; notable ones:

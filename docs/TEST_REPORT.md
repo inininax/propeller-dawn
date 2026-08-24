@@ -72,6 +72,23 @@ Root-caused via in-failure state dumps (scene key, stats, live enemy list):
 2. Run #5: simulation crawled at a few % of wall speed (RAF ~2–5 fps × 5-step cap) → e2e builds raise the per-frame step cap to 240 (production unchanged); `hoverTop` path now terminates immediately once off-screen instead of tens of seconds later.
    Force-progress fallback with full state dump remains as a safety net; any forced transition is reported loudly in the failure message.
 
+**Resolution (run #8, all green)**: e2e builds now run the loop with `forceSetTimeOut: true` and `smoothStep: false`, bypassing RAF throttling entirely; production rendering behavior unchanged.
+
+## Lighthouse (live URL, 2026-08-25)
+
+Measured against https://inininax.github.io/propeller-dawn/ (Lighthouse CLI, default mobile emulation + 4x CPU throttle):
+
+| Category       | Score |
+| -------------- | ----- |
+| Performance    | 58    |
+| Accessibility  | 93    |
+| Best Practices | 100   |
+| SEO            | 100   |
+
+FCP 2.9s · LCP 3.2s · CLS 0 · Speed Index 3.2s · TBT 12.5s.
+
+TBT is dominated by boot-time procedural texture generation on the emulated slow CPU. Mitigation shipped in the same release: boot now generates textures in 7 small chunks (per-family) instead of 2 large blocks, keeping each main-thread task short and the loading bar moving. Note the 58 is boot-cost on a throttled CPU — in-game frame rate on real hardware measured 85 avg / 63 min (see above), and gameplay runs at a steady 60. Remaining boot cost is Phaser engine init (~330KB gzip parse) which is chunk-split and cacheable; further gains (worker-based texture gen, engine lazy-hydration) are tracked as post-1.1 polish.
+
 ## Independent review pass (2026-08-24)
 
 A separate reviewer agent audited production-leak safety, lifecycle leaks, UI wiring, originality, doc accuracy and i18n completeness before release. Findings (1 blocker, 4 major/minor, 2 nits) were **all fixed and re-verified** against every gate in the table above; notable ones:

@@ -66,3 +66,7 @@ Cumulative verified hands-on time: **≈3h55m**.
 
 | 01:05 – 01:25 | ~0h20 | (1차 시도) CI run #4/#5 dump 분석: (a) hidden auto-pause는 해소됐으나 시뮬이 벽시계의 수 % 속도로 진행 — CI 헤드리스 RAF가 초당 수 회라 프레임당 5스텝 캡이 병목. e2e 빌드 한정 캡을 240으로 완화(프로덕션 불변). (b) morrowBomber hoverTop이 화면 밖(y>1040)에서도 done 판정이 수십 초 늦는 경로 수식 문제 수정 — y>1100 즉시 종료. | 로컬 E2E 16 passed ✓ · unit 62/62 ✓ |
 | 01:40 – 01:55 | ~0h15 | Run #6 덤프 정밀 분석: moveT/elapsed 비율 0.24x = 프레임당 100ms 캡(`Math.min(delta,100)`) × RAF ~2.5fps — 정확히 일치. e2e 빌드 한정 프레임 캡을 4000ms로 완화(프로덕션 100ms 불변). RAF ≥ 0.25fps만 있으면 벽시계 추격 가능. | 로컬 E2E 16 passed ✓ |
+
+| 02:00 – 02:20 | ~0h20 | Run #7-8: e2e 빌드에서 forceSetTimeOut + smoothStep 비활성화로 RAF 스로틀 우회 → **CI 전체 GREEN** (quality 25s / e2e 4m09s / build 16s). Pages 배포 성공, 라이브 URL 스모크(HTTP 200, 타이틀·sw.js 확인). | CI run #8 all green ✓ · https://inininax.github.io/propeller-dawn/ 200 OK ✓ |
+
+Cumulative verified hands-on time: **≈4h35m**.

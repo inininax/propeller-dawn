@@ -79,12 +79,16 @@ function bodyGradient(ctx: CanvasRenderingContext2D, top: string, bottom: string
   return g;
 }
 
+export const TEXTURE_GEN_STEPS: Array<(scene: Phaser.Scene) => void> = [
+  genPlayerShips,
+  genEnemies,
+  genBullets,
+  genItems,
+  genFx,
+];
+
 export function generateGameTextures(scene: Phaser.Scene): void {
-  genPlayerShips(scene);
-  genEnemies(scene);
-  genBullets(scene);
-  genItems(scene);
-  genFx(scene);
+  for (const step of TEXTURE_GEN_STEPS) step(scene);
 }
 
 function genPlayerShips(scene: Phaser.Scene): void {

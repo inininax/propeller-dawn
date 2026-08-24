@@ -35,7 +35,11 @@ try {
     roundPixels: true,
     disableContextMenu: true,
     banner: false,
-    fps: { target: 60, min: 30 },
+    fps: {
+      target: 60,
+      min: 30,
+      ...(__PD_DEBUG_HOOKS__ ? { forceSetTimeOut: true, smoothStep: false } : {}),
+    },
     input: { gamepad: true },
     scale: {
       mode: Phaser.Scale.FIT,

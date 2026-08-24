@@ -49,6 +49,7 @@ declare const __PD_DEBUG_HOOKS__: boolean;
 
 const FIXED_STEP_MS = 1000 / 60;
 const MAX_STEPS_PER_FRAME = __PD_DEBUG_HOOKS__ ? 240 : 5;
+const MAX_FRAME_MS = __PD_DEBUG_HOOKS__ ? 4000 : 100;
 const SCORE_CONFIG = {
   comboWindowMs: COMBO_WINDOW_MS,
   multStepCombo: 10,
@@ -304,7 +305,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    const dt = Math.min(delta, 100);
+    const dt = Math.min(delta, MAX_FRAME_MS);
     this.background.update(dt);
     this.accumulatorMs += dt;
     let steps = 0;

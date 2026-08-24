@@ -146,7 +146,14 @@ export async function apiOf(page: Page): Promise<DebugApi> {
     },
     forceGameOver: () => page.evaluate(() => (window as unknown as PD).__PD_API__?.forceGameOver()),
     completeStageNow: () =>
-      page.evaluate(() => (window as unknown as PD).__PD_API__?.completeStageNow()),
+      page.evaluate(() => {
+        (
+          window as unknown as {
+            __PD_GAME__?: { scene: { resume(key: string): void } };
+          }
+        ).__PD_GAME__?.scene.resume('Game');
+        return (window as unknown as PD).__PD_API__?.completeStageNow();
+      }),
   };
 }
 
@@ -180,7 +187,12 @@ export async function dumpGameState(page: Page): Promise<string> {
       }
     ).__PD_API__;
     if (!api) return 'no api';
-    return JSON.stringify({ stats: api.getStats(), enemies: api.enemyInfo() });
+    const scene = (
+      window as unknown as {
+        __PD_SAVE__?: { sceneKey(): string };
+      }
+    ).__PD_SAVE__?.sceneKey();
+    return JSON.stringify({ scene, stats: api.getStats(), enemies: api.enemyInfo() });
   });
 }
 

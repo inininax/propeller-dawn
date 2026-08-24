@@ -123,10 +123,13 @@ export class EnemyBulletPool {
   }
 
   clearAll(convertToScoreFx = false): void {
+    let fxBudget = convertToScoreFx ? 8 : 0;
     for (let i = this.active.length - 1; i >= 0; i--) {
-      if (convertToScoreFx) {
-        this.scene.add
-          .text(this.active[i].img.x, this.active[i].img.y, '+50', {
+      if (fxBudget > 0) {
+        fxBudget -= 1;
+        const img = this.active[i].img;
+        const toast = this.scene.add
+          .text(img.x, img.y, '+50', {
             fontFamily: 'monospace',
             fontSize: '16px',
             color: '#ffd75e',
@@ -134,6 +137,13 @@ export class EnemyBulletPool {
           .setOrigin(0.5)
           .setDepth(70)
           .setScale(0.9);
+        this.scene.tweens.add({
+          targets: toast,
+          y: toast.y - 30,
+          alpha: 0,
+          duration: 600,
+          onComplete: () => toast.destroy(),
+        });
       }
       this.recycle(i);
     }

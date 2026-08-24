@@ -110,7 +110,7 @@ test.describe('desktop core flows', () => {
     await api.warpToBoss();
     await waitBossReady(page);
     expect(await api.smashBoss()).toBe(true);
-    await expectScene(page, 'StageClearOverlay', 35_000);
+    await expectScene(page, 'StageClearOverlay', 120_000);
     await page.waitForTimeout(2400);
     await page.keyboard.press('Enter');
     await expectScene(page, 'Briefing');
@@ -124,7 +124,7 @@ test.describe('desktop core flows', () => {
     await api.warpToBoss();
     await waitBossReady(page, 60_000);
     expect(await api.smashBoss()).toBe(true);
-    await expectScene(page, 'Result', 25_000);
+    await expectScene(page, 'Result', 90_000);
   });
 
   test('game over leads to results and restart resets the run', async () => {

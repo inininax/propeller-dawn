@@ -114,6 +114,9 @@ export class SettingsScene extends Phaser.Scene {
         label: () => tr(this, 'settings.tutorial'),
         value: () => '',
         adjust: () => {
+          this.scene.stop(SCENE.GAME);
+          this.scene.stop(SCENE.PAUSE);
+          this.registry.remove('settingsReturn');
           this.scene.start(SCENE.TUTORIAL, { then: SCENE.TITLE });
         },
       },
@@ -138,7 +141,10 @@ export class SettingsScene extends Phaser.Scene {
             return;
           }
           save.resetAll();
-          audio.setMuted(false);
+          audio.setMuted(save.data.settings.muted);
+          audio.setMusicVolume(save.data.settings.musicVolume);
+          audio.setSfxVolume(save.data.settings.sfxVolume);
+          i18n.setPreference(save.data.settings.language);
           this.confirmErase = false;
           this.rowButtons[8].setText(tr(this, 'settings.resetData'));
           this.showToast(tr(this, 'settings.erased'));

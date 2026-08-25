@@ -128,8 +128,8 @@ export class ResultScene extends Phaser.Scene {
     });
   }
 
-  private addAction(label: LocaleKey, y: number, action: () => void): void {
-    const btn = new GameButton(this, GAME_WIDTH / 2, y, tr(this, label), {
+  private addAction(label: string, y: number, action: () => void): void {
+    const btn = new GameButton(this, GAME_WIDTH / 2, y, label, {
       width: 340,
       onSelect: action,
     });
@@ -138,7 +138,7 @@ export class ResultScene extends Phaser.Scene {
   }
 
   private addResultActions(run: RunState): void {
-    this.addAction('common.restart', 600, () => {
+    this.addAction(tr(this, 'common.restart'), 600, () => {
       const { audio } = getServices(this);
       audio.play('uiConfirm');
       const diff = DIFFICULTIES[run.difficulty];
@@ -146,7 +146,7 @@ export class ResultScene extends Phaser.Scene {
       this.scene.start(SCENE.BRIEFING, {
         run: {
           ...run,
-          lives: diff.playerLives,
+          lives: diff.playerLives - 1,
           bombs: diff.startBombs + ship.startBombsBonus,
           power: 1,
           hasShield: false,
@@ -157,7 +157,7 @@ export class ResultScene extends Phaser.Scene {
         },
       } satisfies BriefingData);
     });
-    this.addAction('result.returnTitle', 686, () => {
+    this.addAction(tr(this, 'result.returnTitle'), 686, () => {
       this.scene.start(SCENE.TITLE);
     });
   }
@@ -167,7 +167,7 @@ export class ResultScene extends Phaser.Scene {
     const left = diff.continueLimit - run.continuesUsed;
     makeBodyText(this, GAME_WIDTH / 2, 520, tr(this, 'result.continueOffer'), 20, '#ffd75e');
 
-    this.addAction('result.useContinue', 586, () => this.doContinue(run));
+    this.addAction(tr(this, 'result.useContinue', { n: left }), 586, () => this.doContinue(run));
     this.countdownTimer = makeBodyText(this, GAME_WIDTH / 2, 540, '', 15, '#8fa3c7');
     const timerEvent = this.time.addEvent({
       delay: 1000,
@@ -185,14 +185,18 @@ export class ResultScene extends Phaser.Scene {
     });
     this.updateCountdownLabel(left);
 
-    this.addAction('result.giveUp', 686, () => {
+    this.addAction(tr(this, 'result.giveUp'), 686, () => {
       timerEvent.remove();
       this.giveUp(run);
     });
   }
 
   private updateCountdownLabel(left: number): void {
-    this.countdownTimer?.setText(tr(this, 'result.continueLeft', { n: left }));
+    this.countdownTimer?.setText(
+      `${tr(this, 'result.continueLeft', { n: left })}\n${tr(this, 'result.autoEnd', {
+        s: this.countdownValue,
+      })}`,
+    );
   }
 
   private doContinue(run: RunState): void {
@@ -203,7 +207,7 @@ export class ResultScene extends Phaser.Scene {
     const continued: RunState = {
       ...run,
       continuesUsed: run.continuesUsed + 1,
-      lives: diff.playerLives,
+      lives: diff.playerLives - 1,
       bombs: diff.startBombs + ship.startBombsBonus,
       power: Math.max(1, run.power - 1),
       hasShield: false,

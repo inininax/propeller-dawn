@@ -74,6 +74,10 @@ export const KO: Record<LocaleKey, string> = {
   'banner.finalboss': '경고 · 잠불 왕관',
 
   'hud.hi': '최고',
+  'hud.lives': '생명',
+  'hud.bomb': '폭탄',
+  'hud.power': '파워',
+  'hud.combo': '콤보',
 
   'pause.title': '일시정지',
   'pause.settings': '설정',
@@ -96,6 +100,7 @@ export const KO: Record<LocaleKey, string> = {
   'result.continueLeft': '{n}회 남음',
   'result.useContinue': '이어하기 ({n})',
   'result.penaltyNote': '이어하기 {n}회 사용 · 점수 ×{m}',
+  'result.autoEnd': '자동 종료 {s}초 전',
   'result.giveUp': '비행 종료',
   'result.returnTitle': '타이틀 화면',
 

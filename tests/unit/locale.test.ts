@@ -3,8 +3,8 @@ import { I18n, resolveLanguage } from '@/systems/locale/i18n';
 import { isShipUnlocked, shipUnlockStage } from '@/data/ships';
 
 describe('i18n', () => {
-  it('detects system language', () => {
-    expect(['ko', 'en']).toContain(resolveLanguage('auto'));
+  it('defaults to English; explicit preference wins', () => {
+    expect(resolveLanguage('auto')).toBe('en');
     expect(resolveLanguage('ko')).toBe('ko');
     expect(resolveLanguage('en')).toBe('en');
   });

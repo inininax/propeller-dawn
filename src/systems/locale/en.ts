@@ -73,6 +73,10 @@ export const EN = {
   'banner.finalboss': 'WARNING · THE EMBER CROWN',
 
   'hud.hi': 'HI',
+  'hud.lives': 'LIVES',
+  'hud.bomb': 'BOMB',
+  'hud.power': 'PWR',
+  'hud.combo': 'COMBO',
 
   'pause.title': 'PAUSED',
   'pause.settings': 'Settings',
@@ -95,6 +99,7 @@ export const EN = {
   'result.continueLeft': '{n} left',
   'result.useContinue': 'Continue ({n})',
   'result.penaltyNote': 'Continues used: {n} · score ×{m}',
+  'result.autoEnd': 'Auto-end in {s}s',
   'result.giveUp': 'End Flight',
   'result.returnTitle': 'Title Screen',
 

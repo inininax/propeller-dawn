@@ -50,6 +50,7 @@ export class BootScene extends Phaser.Scene {
           try {
             steps[i]();
           } catch (err) {
+            timer.remove();
             reportBootError(err);
             return;
           }
@@ -92,7 +93,7 @@ export class BootScene extends Phaser.Scene {
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
           audio.suspend();
-        } else {
+        } else if (!audio.isUserSuspended) {
           audio.resume();
         }
       });
@@ -117,7 +118,7 @@ export class BootScene extends Phaser.Scene {
               shipId: ship.id,
               difficulty: diff.id,
               stageIndex: (patch?.stageIndex as number | undefined) ?? 0,
-              lives: diff.playerLives,
+              lives: diff.playerLives - 1,
               bombs: diff.startBombs + ship.startBombsBonus,
               power: 1,
               hasShield: false,

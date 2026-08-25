@@ -3,6 +3,26 @@
 All notable changes to Propeller Dawn are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/) · [SemVer](https://semver.org/).
 
+## [1.1.1] — 2026-08-25
+
+### Changed
+
+- **English is now the default UI language** (Korean remains fully available via Settings → Language).
+
+### Fixed
+
+- Stage combat score (kills/combo/graze/medals) now carries into stage bonuses, the results screen and hi-scores — previously the displayed score silently dropped at stage clear and most points never reached the final tally.
+- Ember Crown HP bar no longer refills when the core phase starts; core damage no longer double-counts the whole fight's HP pool.
+- Destroyed Ember Crown thrusters no longer remain lethal or keep dashing; the boss bar/laser now hide correctly when the boss dies mid-laser.
+- Pause → Settings → Replay Tutorial no longer strands a frozen pause overlay over the game.
+- Held keys, focus mode and touch drag are cleared on pause and scene restart (no more stuck auto-fire or drifting ship after resume).
+- Lives HUD now shows current stock including the active ship (last life no longer displays as empty).
+- Gamepad players can now navigate and dismiss the pause overlay.
+- Continue button renders its remaining count; the auto-end countdown is actually visible each second.
+- Tab-switching away no longer resumes game music while paused; old-iOS WebKit audio unlock no longer fails permanently; noise-buffer failure no longer disables all audio.
+- Enemy turrets stop firing from off-field; items are no longer magnet-collected by the player's corpse; boss-death bullet clear awards real score instead of phantom "+50" popups.
+- Background ground layer no longer shows a drifting seam; boot no longer retries a failed step forever; HUD labels are localized; erase-save reverts live audio/language state.
+
 ## [1.1.0] — 2026-08-25
 
 ### Added

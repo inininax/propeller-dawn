@@ -272,7 +272,7 @@ export class ShipSelectScene extends Phaser.Scene {
       shipId: ship.id,
       difficulty,
       stageIndex: 0,
-      lives: diff.playerLives,
+      lives: diff.playerLives - 1,
       bombs: diff.startBombs + ship.startBombsBonus,
       power: 1,
       hasShield: false,

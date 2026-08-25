@@ -122,29 +122,8 @@ export class EnemyBulletPool {
     }
   }
 
-  clearAll(convertToScoreFx = false): void {
-    let fxBudget = convertToScoreFx ? 8 : 0;
+  clearAll(): void {
     for (let i = this.active.length - 1; i >= 0; i--) {
-      if (fxBudget > 0) {
-        fxBudget -= 1;
-        const img = this.active[i].img;
-        const toast = this.scene.add
-          .text(img.x, img.y, '+50', {
-            fontFamily: 'monospace',
-            fontSize: '16px',
-            color: '#ffd75e',
-          })
-          .setOrigin(0.5)
-          .setDepth(70)
-          .setScale(0.9);
-        this.scene.tweens.add({
-          targets: toast,
-          y: toast.y - 30,
-          alpha: 0,
-          duration: 600,
-          onComplete: () => toast.destroy(),
-        });
-      }
       this.recycle(i);
     }
   }

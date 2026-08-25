@@ -87,31 +87,29 @@ export abstract class BossBase {
 
   abstract update(dtMs: number): void;
 
-  abstract hitCircles(): Array<{ x: number; y: number; r: number }>;
+  abstract hitCircles(): Array<{ x: number; y: number; r: number; part: string }>;
 
   abstract hazards(): BossHazard[];
 
   takeDamageAt(amount: number, hx: number, hy: number): number {
     if (!this.entered || this.dying) return 0;
     let bestDistSq = Infinity;
-    let bestIndex = -1;
-    const circles = this.hitCircles();
-    for (let i = 0; i < circles.length; i++) {
-      const c = circles[i];
+    let bestPart: string | null = null;
+    for (const c of this.hitCircles()) {
       const dx = hx - c.x;
       const dy = hy - c.y;
       const d = dx * dx + dy * dy;
       const rr = c.r * c.r;
       if (d <= rr && d < bestDistSq) {
         bestDistSq = d;
-        bestIndex = i;
+        bestPart = c.part;
       }
     }
-    if (bestIndex < 0) return 0;
-    return this.routeDamage(bestIndex, amount);
+    if (bestPart === null) return 0;
+    return this.routeDamage(bestPart, amount);
   }
 
-  protected abstract routeDamage(partIndex: number, amount: number): number;
+  protected abstract routeDamage(part: string, amount: number): number;
 
   protected beginDeath(): void {
     this.dying = true;
@@ -301,11 +299,11 @@ export class SolbreakerBoss extends BossBase {
     });
   }
 
-  hitCircles(): Array<{ x: number; y: number; r: number }> {
+  hitCircles(): Array<{ x: number; y: number; r: number; part: string }> {
     return [
-      { x: this.container.x, y: this.container.y, r: 62 },
-      { x: this.container.x - 110, y: this.container.y + 74, r: 26 },
-      { x: this.container.x + 110, y: this.container.y + 74, r: 26 },
+      { x: this.container.x, y: this.container.y, r: 62, part: 'body' },
+      { x: this.container.x - 110, y: this.container.y + 74, r: 26, part: 'body' },
+      { x: this.container.x + 110, y: this.container.y + 74, r: 26, part: 'body' },
     ];
   }
 
@@ -313,7 +311,7 @@ export class SolbreakerBoss extends BossBase {
     return [];
   }
 
-  protected routeDamage(_part: number, amount: number): number {
+  protected routeDamage(_part: string, amount: number): number {
     const applied = Math.min(this.hp, amount);
     this.hp -= applied;
     if (this.hp <= 0) {
@@ -365,9 +363,13 @@ export class EmberCrownBoss extends BossBase {
 
   private readonly st: EmberState;
 
+  private readonly poolTotal: number;
+
   constructor(scene: Phaser.Scene, api: BossApi, hpMult: number) {
     const thrusterHpEach = Math.round(520 * hpMult);
-    super(scene, api, thrusterHpEach * 2 + Math.round(850 * hpMult) + Math.round(1150 * hpMult));
+    const coreHp = Math.round(1150 * hpMult);
+    super(scene, api, coreHp);
+    this.poolTotal = thrusterHpEach * 2 + Math.round(850 * hpMult) + coreHp;
     this.sprite = scene.add.image(0, 0, 'boss_embercrown');
     this.thrusterGlowL = scene.add
       .image(-THRUSTER_OFFSET_X, THRUSTER_Y, 'p_spark')
@@ -633,12 +635,29 @@ export class EmberCrownBoss extends BossBase {
     return Math.min(430, Math.max(110, x));
   }
 
-  hitCircles(): Array<{ x: number; y: number; r: number }> {
-    return [
-      { x: this.container.x, y: this.container.y + 62, r: 66 },
-      { x: this.container.x - THRUSTER_OFFSET_X, y: this.container.y + THRUSTER_Y, r: 32 },
-      { x: this.container.x + THRUSTER_OFFSET_X, y: this.container.y + THRUSTER_Y, r: 32 },
+  hitCircles(): Array<{ x: number; y: number; r: number; part: string }> {
+    const circles: Array<{ x: number; y: number; r: number; part: string }> = [
+      { x: this.container.x, y: this.container.y + 62, r: 66, part: 'body' },
     ];
+    if (this.st.stage === 'thrusters') {
+      if (this.st.thrusterHp[0] > 0) {
+        circles.push({
+          x: this.container.x - THRUSTER_OFFSET_X,
+          y: this.container.y + THRUSTER_Y,
+          r: 32,
+          part: 'L',
+        });
+      }
+      if (this.st.thrusterHp[1] > 0) {
+        circles.push({
+          x: this.container.x + THRUSTER_OFFSET_X,
+          y: this.container.y + THRUSTER_Y,
+          r: 32,
+          part: 'R',
+        });
+      }
+    }
+    return circles;
   }
 
   hazards(): BossHazard[] {
@@ -653,10 +672,10 @@ export class EmberCrownBoss extends BossBase {
     ];
   }
 
-  protected routeDamage(partIndex: number, amount: number): number {
+  protected routeDamage(part: string, amount: number): number {
     if (this.st.stage === 'thrusters') {
-      if (partIndex === 1 || partIndex === 2) {
-        const idx = partIndex - 1;
+      if (part === 'L' || part === 'R') {
+        const idx = part === 'L' ? 0 : 1;
         if (this.st.thrusterHp[idx] <= 0) return 0;
         const applied = Math.min(this.st.thrusterHp[idx], amount);
         this.st.thrusterHp[idx] -= applied;
@@ -667,7 +686,7 @@ export class EmberCrownBoss extends BossBase {
       return 0;
     }
     if (this.st.stage === 'gunner') {
-      if (partIndex !== 0) return 0;
+      if (part !== 'body') return 0;
       const applied = Math.min(this.st.gunnerHp, amount);
       this.st.gunnerHp -= applied;
       if (this.st.gunnerHp <= 0) this.enterCoreStage();
@@ -683,17 +702,12 @@ export class EmberCrownBoss extends BossBase {
 
   displayHpFraction(): number {
     if (this.dying) return 0;
-    switch (this.st.stage) {
-      case 'thrusters':
-        return (
-          (this.st.thrusterHp[0] + this.st.thrusterHp[1]) /
-          (this.st.thrusterHp[0] + this.st.thrusterHp[1] + this.st.gunnerHp + this.hp)
-        );
-      case 'gunner':
-        return this.st.gunnerHp / (this.st.gunnerHp + this.hp);
-      default:
-        return this.hpFraction;
-    }
+    return this.remainingStructure() / this.poolTotal;
+  }
+
+  private remainingStructure(): number {
+    const thrusters = Math.max(0, this.st.thrusterHp[0]) + Math.max(0, this.st.thrusterHp[1]);
+    return thrusters + this.st.gunnerHp + this.hp;
   }
 
   private onThrusterDestroyed(idx: number): void {
@@ -717,6 +731,13 @@ export class EmberCrownBoss extends BossBase {
     this.st.dashTimerMs = 2600;
     this.api.sfx('bossWarn');
     this.api.shake(0.01, 600);
+  }
+
+  beginDeath(): void {
+    super.beginDeath();
+    this.st.laserPhase = 'idle';
+    this.warnRect.setVisible(false);
+    this.beamImg.setVisible(false);
   }
 
   private flashHit(): void {

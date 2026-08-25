@@ -166,6 +166,10 @@ export class GameScene extends Phaser.Scene {
     this.rng = new SeededRandom((seedBase + this.run.stageIndex * 7919) >>> 0);
 
     this.scoreState = createScoreState();
+    this.pressedCommands.clear();
+    this.focused = false;
+    this.dragId = -1;
+    this.dragVector = { x: 0, y: 0 };
     this.stageElapsedMs = 0;
     this.accumulatorMs = 0;
     this.enemies = [];
@@ -341,8 +345,9 @@ export class GameScene extends Phaser.Scene {
 
     this.playerBullets.update(dtMs);
     this.enemyBullets.update(dtMs, (spawns) => this.enemyBullets.spawnMany(spawns, 0xc98cff));
-    for (const c of this.itemsMan.update(dtMs, { x: this.player.x, y: this.player.y })) {
-      this.collectItem(c.kind);
+    const collected = this.itemsMan.update(dtMs, { x: this.player.x, y: this.player.y });
+    if (this.player.isAlive) {
+      for (const c of collected) this.collectItem(c.kind);
     }
 
     this.handleCollisions();
@@ -576,7 +581,11 @@ export class GameScene extends Phaser.Scene {
   private clearBoss(): void {
     this.boss?.destroy();
     this.boss = null;
-    this.enemyBullets.clearAll(true);
+    const cleared = this.enemyBullets.count;
+    if (cleared > 0) {
+      this.scoreState.score += cleared * 50;
+    }
+    this.enemyBullets.clearAll();
   }
 
   private handleCollisions(): void {
@@ -767,6 +776,7 @@ export class GameScene extends Phaser.Scene {
   private beginGameOver(): void {
     if (this.gameOverStarted) return;
     this.gameOverStarted = true;
+    this.run.score += this.scoreState.score;
     this.time.delayedCall(1000, () => {
       this.scene.start(SCENE.RESULT, {
         won: false,
@@ -794,6 +804,7 @@ export class GameScene extends Phaser.Scene {
 
   private completeStage(): void {
     this.stageCompleted = true;
+    this.run.score += this.scoreState.score;
     const livesBonus = this.run.lives * 10000;
     const bombsBonus = this.run.bombs * 5000;
     const flightBonus = 20000;
@@ -859,7 +870,7 @@ export class GameScene extends Phaser.Scene {
 
   private showBanner(key: LocaleKey): void {
     this.bannerText?.destroy();
-    this.bannerText = this.add
+    const text = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT * 0.36, this.i18n.t(key), {
         fontFamily: FONT_STACK,
         fontSize: '38px',
@@ -870,22 +881,23 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(DEPTH.OVERLAY)
       .setAlpha(0);
+    this.bannerText = text;
     this.tweens.add({
-      targets: this.bannerText,
+      targets: text,
       alpha: 1,
       duration: 260,
       yoyo: true,
       hold: 1300,
       onComplete: () => {
-        this.bannerText?.destroy();
-        this.bannerText = undefined;
+        text.destroy();
+        if (this.bannerText === text) this.bannerText = undefined;
       },
     });
   }
 
   private refreshHud(): void {
     this.hud.updateScore(this.run.score + this.scoreState.score);
-    this.hud.updateLives(Math.max(0, this.run.lives));
+    this.hud.updateLives(Math.max(0, this.run.lives) + 1);
     this.hud.updateBombs(this.run.bombs);
     this.hud.updatePower(this.run.power);
     this.hud.updateCombo(this.scoreState.combo, this.scoreState.multiplier);
@@ -900,7 +912,11 @@ export class GameScene extends Phaser.Scene {
 
   togglePause(): void {
     if (!this.scene.isActive() || this.stageCompleted || this.gameOverStarted) return;
-    this.audio.suspend();
+    this.pressedCommands.clear();
+    this.focused = false;
+    this.dragId = -1;
+    this.dragVector = { x: 0, y: 0 };
+    this.audio.suspend(true);
     this.scene.launch(SCENE.PAUSE, { from: SCENE.GAME });
     this.scene.pause();
   }

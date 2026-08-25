@@ -89,6 +89,18 @@ FCP 2.9s · LCP 3.2s · CLS 0 · Speed Index 3.2s · TBT 12.5s.
 
 TBT is dominated by boot-time procedural texture generation on the emulated slow CPU. Mitigation shipped in the same release: boot now generates textures in 7 small chunks (per-family) instead of 2 large blocks, keeping each main-thread task short and the loading bar moving. Note the 58 is boot-cost on a throttled CPU — in-game frame rate on real hardware measured 85 avg / 63 min (see above), and gameplay runs at a steady 60. Remaining boot cost is Phaser engine init (~330KB gzip parse) which is chunk-split and cacheable; further gains (worker-based texture gen, engine lazy-hydration) are tracked as post-1.1 polish.
 
+## Team review pass — v1.1.1 (2026-08-25)
+
+Three parallel reviewer agents (gameplay logic / scenes-UI-input-save / audio-art-lifecycle) filed 26 findings (1 critical, 10 major, 15 minor). Developer fixed all critical/major + 13 minors; an independent verifier then re-checked every fix with file:line evidence (24/26 first pass, 2 misses fixed and re-verified). Player-facing highlights:
+
+- Stage combat score now carries into results and hi-scores (was silently discarded).
+- Ember Crown HP bar no longer refills at core phase; destroyed thrusters are no longer solid/lethal; laser visuals can't outlive the boss.
+- Pause → Settings → Replay Tutorial no longer wedges the session; held inputs no longer stick across pause.
+- Gamepad can fully operate the pause overlay; continue button shows its count; countdown is visible.
+- Audio: tab-switch no longer un-mutes a paused game; legacy WebKit unlock fixed; noise-buffer failure is contained.
+
+Deferred as tracked polish: per-frame allocation trimming (C4), explosion emitter pooling (C5).
+
 ## Independent review pass (2026-08-24)
 
 A separate reviewer agent audited production-leak safety, lifecycle leaks, UI wiring, originality, doc accuracy and i18n completeness before release. Findings (1 blocker, 4 major/minor, 2 nits) were **all fixed and re-verified** against every gate in the table above; notable ones:

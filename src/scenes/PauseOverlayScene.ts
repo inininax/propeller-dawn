@@ -14,13 +14,22 @@ export class PauseOverlayScene extends Phaser.Scene {
 
   private buttons: GameButton[] = [];
 
+  private actions: Array<() => void> = [];
+
+  private padPrev = { start: false, a: false, up: false, down: false };
+
+  private langOff?: () => void;
+
   constructor() {
     super(SCENE.PAUSE);
   }
 
   create(_data: PauseData): void {
     this.buttons = [];
-    const { audio } = getServices(this);
+    this.actions = [];
+    const { audio, i18n } = getServices(this);
+    this.langOff?.();
+    this.langOff = i18n.onChange(() => this.scene.restart());
     addBackdrop(this, 0.66);
     makeTitleText(this, GAME_WIDTH / 2, 340, tr(this, 'pause.title'), 40);
 
@@ -49,6 +58,7 @@ export class PauseOverlayScene extends Phaser.Scene {
       },
     ];
 
+    this.actions = actions.map((a) => a.run);
     actions.forEach((action, i) => {
       this.buttons.push(
         new GameButton(this, GAME_WIDTH / 2, 470 + i * 78, tr(this, action.label), {
@@ -59,8 +69,9 @@ export class PauseOverlayScene extends Phaser.Scene {
     });
     this.menu = new MenuList(this.buttons, {
       onMove: () => audio.play('uiMove'),
-      onSelect: (i) => actions[i].run(),
+      onSelect: (i) => this.actions[i](),
     });
+    this.events.once('shutdown', () => this.langOff?.());
 
     this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
       if (event.code === 'Escape' || event.code === 'KeyP') {
@@ -76,10 +87,34 @@ export class PauseOverlayScene extends Phaser.Scene {
     });
   }
 
+  update(): void {
+    const pad = this.input.gamepad?.getPad(0);
+    if (!pad) return;
+    const start = pad.buttons[9]?.pressed ?? false;
+    const a = pad.buttons[0]?.pressed ?? false;
+    const up = pad.up ?? false;
+    const down = pad.down ?? false;
+    if (start && !this.padPrev.start) {
+      this.resumeGame();
+      this.padPrev = { start, a, up, down };
+      return;
+    }
+    if (a && !this.padPrev.a) {
+      this.menu.selectCurrent();
+    }
+    if (up && !this.padPrev.up) {
+      this.menu.move(-1);
+    }
+    if (down && !this.padPrev.down) {
+      this.menu.move(1);
+    }
+    this.padPrev = { start, a, up, down };
+  }
+
   private resumeGame(): void {
     const { audio } = getServices(this);
     audio.play('uiConfirm');
-    audio.resume();
+    audio.resume(true);
     this.scene.stop();
     this.scene.resume(SCENE.GAME);
   }

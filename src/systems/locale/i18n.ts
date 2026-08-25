@@ -47,18 +47,7 @@ export class I18n {
 
 export function resolveLanguage(preference: 'auto' | Language): Language {
   if (preference === 'ko' || preference === 'en') return preference;
-  if (typeof navigator !== 'undefined') {
-    const langs = navigator.languages ?? [navigator.language];
-    for (const tag of langs) {
-      if (tag && tag.toLowerCase().startsWith('ko')) return 'ko';
-      if (tag && tag.toLowerCase().startsWith('en')) return 'en';
-    }
-  }
   return 'en';
-}
-
-export function detectSystemLanguage(): Language {
-  return resolveLanguage('auto');
 }
 
 export type { LocaleKey };

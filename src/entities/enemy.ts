@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import { GAME_HEIGHT, GAME_WIDTH } from '../core/constants';
 import type { BulletSpawn, EnemyDef, MoveId, PatternContext } from '../core/types';
 import { ENEMIES, MOVES } from '../data/enemies';
 import { PATTERNS } from '../systems/patterns';
@@ -90,7 +91,14 @@ export class Enemy {
   }
 
   private updateFiring(dtMs: number): void {
-    if (this.sprite.y < -10 || this.sprite.y > 900) return;
+    if (
+      this.sprite.y < -10 ||
+      this.sprite.y > GAME_HEIGHT - 60 ||
+      this.sprite.x < -10 ||
+      this.sprite.x > GAME_WIDTH + 10
+    ) {
+      return;
+    }
     for (let i = 0; i < this.def.fire.length; i++) {
       const fd = this.def.fire[i];
       this.fireTimers[i] -= dtMs;

@@ -155,7 +155,7 @@ export function generateBackgroundTextures(scene: Phaser.Scene, theme: ThemeName
     [`bg_${theme}_sky`, GAME_WIDTH, GAME_HEIGHT, drawSky(theme)],
     [`bg_${theme}_cloudsFar`, 512, 512, drawClouds(theme, THEMES[theme].cloudFar, 22, 40, 130)],
     [`bg_${theme}_cloudsNear`, 512, 512, drawClouds(theme, THEMES[theme].cloudNear, 14, 60, 190)],
-    [`bg_${theme}_ground`, 512, 220, drawSilhouettes(theme)],
+    [`bg_${theme}_ground`, 540, 220, drawSilhouettes(theme)],
   ];
   for (const [key, w, h, draw] of defs) {
     if (scene.textures.exists(key)) continue;

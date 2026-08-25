@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../core/constants';
 import { formatScore } from '../systems/score';
+import type { I18n } from '../systems/locale/i18n';
+import type { LocaleKey } from '../systems/locale/en';
 import type { GameButton } from './widgets';
 import { FONT_STACK } from './widgets';
 
@@ -63,6 +65,8 @@ export class MenuList {
 }
 
 export class Hud {
+  private readonly i18n: I18n;
+
   private readonly scoreText: Phaser.GameObjects.Text;
 
   private readonly hiText: Phaser.GameObjects.Text;
@@ -88,6 +92,7 @@ export class Hud {
   private lastComboShown = -1;
 
   constructor(scene: Phaser.Scene, hiScore: number, stageLabel: string, shipTextureKey: string) {
+    this.i18n = scene.registry.get('i18n') as I18n;
     const depth = 100;
     this.scoreText = scene.add
       .text(16, 10, '', { fontFamily: FONT_STACK, fontSize: '24px', color: '#ffffff' })
@@ -178,15 +183,18 @@ export class Hud {
   }
 
   updatePower(power: number): void {
-    this.powerText.setText(`PWR ${'●'.repeat(power)}${'○'.repeat(Math.max(0, 3 - power))}`);
+    this.powerText.setText(
+      `${this.t('hud.power')} ${'●'.repeat(power)}${'○'.repeat(Math.max(0, 3 - power))}`,
+    );
   }
 
   updateCombo(combo: number, multiplier: number): void {
     if (combo !== this.lastComboShown) {
       this.lastComboShown = combo;
       if (combo >= 5) {
-        this.comboText.setText(`${combo} COMBO ×${multiplier.toFixed(1)}`);
+        this.comboText.setText(`${combo} ${this.t('hud.combo')} ×${multiplier.toFixed(1)}`);
         this.comboText.setScale(1.25);
+        this.comboText.scene.tweens.killTweensOf(this.comboText);
         this.comboText.scene.tweens.add({
           targets: this.comboText,
           scale: 1,
@@ -219,6 +227,10 @@ export class Hud {
   hideBossBar(): void {
     this.bossBarBg?.setVisible(false);
     this.bossBarFill?.setVisible(false);
+  }
+
+  private t(key: LocaleKey): string {
+    return this.i18n.t(key);
   }
 
   destroy(): void {

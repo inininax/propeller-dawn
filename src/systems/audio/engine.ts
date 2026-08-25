@@ -23,12 +23,18 @@ export class AudioEngine {
 
   private muted = false;
 
+  private userSuspended = false;
+
   private musicVolume = 0.6;
 
   private sfxVolume = 0.8;
 
   get initialized(): boolean {
     return this.ctx !== null;
+  }
+
+  get isUserSuspended(): boolean {
+    return this.userSuspended;
   }
 
   unlock(): void {
@@ -46,13 +52,18 @@ export class AudioEngine {
         this.sfxGain.connect(this.masterGain);
         this.masterGain.connect(this.ctx.destination);
         this.applyVolumes();
-        this.noiseBuffer = this.createNoiseBuffer();
+        try {
+          this.noiseBuffer = this.createNoiseBuffer();
+        } catch {
+          this.noiseBuffer = null;
+        }
       } catch {
         this.ctx = null;
         return;
       }
     }
-    void this.ctx.resume().catch(() => undefined);
+    this.userSuspended = false;
+    void Promise.resolve(this.ctx.resume()).catch(() => undefined);
   }
 
   setMuted(muted: boolean): void {
@@ -70,13 +81,19 @@ export class AudioEngine {
     this.applyVolumes();
   }
 
-  suspend(): void {
+  suspend(user = false): void {
+    if (user) {
+      this.userSuspended = true;
+    }
     void this.ctx?.suspend().catch(() => undefined);
   }
 
-  resume(): void {
+  resume(user = false): void {
+    if (user) {
+      this.userSuspended = false;
+    }
     if (this.ctx && this.ctx.state === 'suspended') {
-      void this.ctx.resume().catch(() => undefined);
+      void Promise.resolve(this.ctx.resume()).catch(() => undefined);
     }
   }
 

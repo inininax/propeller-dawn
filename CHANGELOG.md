@@ -3,6 +3,13 @@
 All notable changes to Propeller Dawn are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/) · [SemVer](https://semver.org/).
 
+## [1.2.0] — 2026-08-25
+
+### Added
+
+- **Leaderboard storage interface** (`LeaderboardStore`) with a local top-100 implementation; results are submitted automatically and the results screen shows your local rank (top 10). The interface is the plug-in point for a future online backend — no accounts, no network calls today.
+- Boot now generates only title-essential textures; gameplay/boss textures are generated at the briefing screen. Lighthouse on the live URL: Performance 58 → **66**, Total Blocking Time **12.5s → 1.0s** (-92%), Accessibility 93 / Best Practices 100 / SEO 100, CLS 0.
+
 ## [1.1.1] — 2026-08-25
 
 ### Changed

@@ -7,6 +7,7 @@ import { addBackdrop, getServices, makeBodyText, makeTitleText, tr } from './hel
 import { GameButton, FONT_STACK } from '../ui/widgets';
 import { MenuList } from '../ui/hud';
 import { applyContinuePenalty, continuePenaltyFactor, formatScore } from '../systems/score';
+import { LocalLeaderboardStore, entryFromRun } from '../systems/leaderboard';
 import type { LocaleKey } from '../systems/locale/en';
 import type { BriefingData, ResultData, RunState } from './types';
 
@@ -41,6 +42,20 @@ export class ResultScene extends Phaser.Scene {
     const previousHi = save.data.hiscores[data.run.difficulty];
     const newRecord = finalScore > previousHi;
     save.submitScore(data.run.difficulty, finalScore);
+
+    const store = new LocalLeaderboardStore(window.localStorage);
+    const entry = entryFromRun(
+      { ...data.run, score: finalScore },
+      data.grazeCount,
+      data.maxCombo,
+      data.won ? 2 : data.run.stageIndex,
+    );
+    void store.rankOf(entry).then((rank) => {
+      if (rank !== null && rank <= 10) {
+        makeBodyText(this, GAME_WIDTH / 2, 318, `LOCAL RANK #${rank}`, 13, '#f2a35c');
+      }
+    });
+    void store.submit(entry);
 
     audio.stopMusic();
     audio.startMusic('result');

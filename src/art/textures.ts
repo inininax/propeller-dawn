@@ -87,8 +87,20 @@ export const TEXTURE_GEN_STEPS: Array<(scene: Phaser.Scene) => void> = [
   genFx,
 ];
 
+export const BOOT_TEXTURE_STEPS: Array<(scene: Phaser.Scene) => void> = [genPlayerShips, genFx];
+
+export const GAMEPLAY_TEXTURE_STEPS: Array<(scene: Phaser.Scene) => void> = [
+  genEnemies,
+  genBullets,
+  genItems,
+];
+
 export function generateGameTextures(scene: Phaser.Scene): void {
   for (const step of TEXTURE_GEN_STEPS) step(scene);
+}
+
+export function generateGameplayTextures(scene: Phaser.Scene): void {
+  for (const step of GAMEPLAY_TEXTURE_STEPS) step(scene);
 }
 
 function genPlayerShips(scene: Phaser.Scene): void {

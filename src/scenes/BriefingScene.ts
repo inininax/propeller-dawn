@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, SCENE } from '../core/constants';
 import { STAGES } from '../data/stages';
+import { GAMEPLAY_TEXTURE_STEPS, generateBossTextures } from '../art/textures';
 import { addBackdrop, getServices, tr } from './helpers';
 import { GameButton, FONT_STACK } from '../ui/widgets';
 import type { LocaleKey } from '../systems/locale/en';
@@ -20,6 +21,8 @@ export class BriefingScene extends Phaser.Scene {
   create(data: BriefingData): void {
     const { audio } = getServices(this);
     this.run = data.run;
+    for (const step of GAMEPLAY_TEXTURE_STEPS) step(this);
+    generateBossTextures(this);
     addBackdrop(this, 1);
     const stage = STAGES[this.run.stageIndex];
 

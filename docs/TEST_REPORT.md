@@ -87,7 +87,11 @@ Measured against https://inininax.github.io/propeller-dawn/ (Lighthouse CLI, def
 
 FCP 2.9s · LCP 3.2s · CLS 0 · Speed Index 3.2s · TBT 12.5s.
 
-TBT is dominated by boot-time procedural texture generation on the emulated slow CPU. Mitigation shipped in the same release: boot now generates textures in 7 small chunks (per-family) instead of 2 large blocks, keeping each main-thread task short and the loading bar moving. Note the 58 is boot-cost on a throttled CPU — in-game frame rate on real hardware measured 85 avg / 63 min (see above), and gameplay runs at a steady 60. Remaining boot cost is Phaser engine init (~330KB gzip parse) which is chunk-split and cacheable; further gains (worker-based texture gen, engine lazy-hydration) are tracked as post-1.1 polish.
+TBT is dominated by boot-time procedural texture generation on the emulated slow CPU. Mitigation shipped in the same release: boot now generates textures in 7 small chunks (per-family) instead of 2 large blocks, keeping each main-thread task short and the loading bar moving. Note the 58 is boot-cost on a throttled CPU — in-game frame rate on real hardware measured 85 avg / 63 min (see above), and gameplay runs at a steady 60. **Update (v1.2.0, same URL re-measure)**: boot now generates only title-essential textures (gameplay/boss textures moved to the briefing step, off the load-critical path). Re-measured: **Performance 66, TBT 1,010ms (-92%)**, FCP 2.9s, CLS 0. Remaining TBT is Phaser engine evaluation (~330KB gzip), amortized by HTTP caching.
+
+### Local leaderboard
+
+`LeaderboardStore` interface + `LocalLeaderboardStore` (top-100, per-difficulty, corruption-safe) covered by 6 unit tests; results screen submits automatically and shows LOCAL RANK for top-10 finishes.
 
 ## Team review pass — v1.1.1 (2026-08-25)
 

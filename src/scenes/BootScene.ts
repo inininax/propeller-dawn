@@ -3,7 +3,7 @@ import { GAME_HEIGHT, GAME_WIDTH, SCENE, STORAGE_KEY } from '../core/constants';
 import { AudioEngine } from '../systems/audio/engine';
 import { I18n } from '../systems/locale/i18n';
 import { SaveService, createBrowserStorage } from '../systems/save';
-import { TEXTURE_GEN_STEPS, generateBossTextures } from '../art/textures';
+import { BOOT_TEXTURE_STEPS } from '../art/textures';
 import { FONT_STACK } from '../ui/widgets';
 import { APP_VERSION } from '../version';
 import { DIFFICULTIES } from '../data/difficulty';
@@ -37,8 +37,7 @@ export class BootScene extends Phaser.Scene {
     this.progressBar.setDepth(2);
 
     const steps: Array<() => void> = [
-      ...TEXTURE_GEN_STEPS.map((fn) => () => fn(this)),
-      () => generateBossTextures(this),
+      ...BOOT_TEXTURE_STEPS.map((fn) => () => fn(this)),
       () => warmParticles(this),
     ];
     let i = 0;
